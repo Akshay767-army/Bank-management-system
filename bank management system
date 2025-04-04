@@ -1,0 +1,108 @@
+import java.util.Scanner;
+
+class BankAccount {
+    private String accountHolderName;
+    private String accountNumber;
+    private double balance;
+
+    // Constructor to initialize the account
+    public BankAccount(String accountHolderName, String accountNumber) {
+        this.accountHolderName = accountHolderName;
+        this.accountNumber = accountNumber;
+        this.balance = 0.0;  // Initial balance is 0
+    }
+
+    // Deposit method
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            System.out.println("Successfully deposited: $" + amount);
+        } else {
+            System.out.println("Invalid deposit amount.");
+        }
+    }
+
+    // Withdraw method
+    public void withdraw(double amount) {
+        if (amount <= balance && amount > 0) {
+            balance -= amount;
+            System.out.println("Successfully withdrew: $" + amount);
+        } else {
+            System.out.println("Insufficient funds or invalid amount.");
+        }
+    }
+
+    // Display account details
+    public void displayAccountDetails() {
+        System.out.println("Account Holder: " + accountHolderName);
+        System.out.println("Account Number: " + accountNumber);
+        System.out.println("Balance: $" + balance);
+    }
+}
+
+public class BankManagementSystem {
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        BankAccount account = null;
+
+        while (true) {
+            System.out.println("\nBank Management System");
+            System.out.println("1. Create Account");
+            System.out.println("2. Deposit");
+            System.out.println("3. Withdraw");
+            System.out.println("4. Display Account Details");
+            System.out.println("5. Exit");
+            System.out.print("Choose an option: ");
+            
+            int choice = scanner.nextInt();
+            scanner.nextLine();  // Consume the newline character
+
+            switch (choice) {
+                case 1: // Create Account
+                    System.out.print("Enter account holder name: ");
+                    String name = scanner.nextLine();
+                    System.out.print("Enter account number: ");
+                    String accNumber = scanner.nextLine();
+                    account = new BankAccount(name, accNumber);
+                    System.out.println("Account created successfully!");
+                    break;
+
+                case 2: // Deposit
+                    if (account == null) {
+                        System.out.println("No account exists. Please create an account first.");
+                    } else {
+                        System.out.print("Enter deposit amount: ");
+                        double depositAmount = scanner.nextDouble();
+                        account.deposit(depositAmount);
+                    }
+                    break;
+
+                case 3: // Withdraw
+                    if (account == null) {
+                        System.out.println("No account exists. Please create an account first.");
+                    } else {
+                        System.out.print("Enter withdrawal amount: ");
+                        double withdrawAmount = scanner.nextDouble();
+                        account.withdraw(withdrawAmount);
+                    }
+                    break;
+
+                case 4: // Display Account Details
+                    if (account == null) {
+                        System.out.println("No account exists. Please create an account first.");
+                    } else {
+                        account.displayAccountDetails();
+                    }
+                    break;
+
+                case 5: // Exit
+                    System.out.println("Exiting system. Goodbye!");
+                    scanner.close();
+                    System.exit(0);
+
+                default:
+                    System.out.println("Invalid option. Please try again.");
+            }
+        }
+    }
+}
