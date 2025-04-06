@@ -1,108 +1,234 @@
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
-class BankAccount {
-    private String accountHolderName;
-    private String accountNumber;
-    private double balance;
-
-    // Constructor to initialize the account
-    public BankAccount(String accountHolderName, String accountNumber) {
-        this.accountHolderName = accountHolderName;
-        this.accountNumber = accountNumber;
-        this.balance = 0.0;  // Initial balance is 0
-    }
-
-    // Deposit method
-    public void deposit(double amount) {
-        if (amount > 0) {
-            balance += amount;
-            System.out.println("Successfully deposited: $" + amount);
-        } else {
-            System.out.println("Invalid deposit amount.");
-        }
-    }
-
-    // Withdraw method
-    public void withdraw(double amount) {
-        if (amount <= balance && amount > 0) {
-            balance -= amount;
-            System.out.println("Successfully withdrew: $" + amount);
-        } else {
-            System.out.println("Insufficient funds or invalid amount.");
-        }
-    }
-
-    // Display account details
-    public void displayAccountDetails() {
-        System.out.println("Account Holder: " + accountHolderName);
-        System.out.println("Account Number: " + accountNumber);
-        System.out.println("Balance: $" + balance);
-    }
-}
-
 public class BankManagementSystem {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        BankAccount account = null;
 
-        while (true) {
-            System.out.println("\nBank Management System");
-            System.out.println("1. Create Account");
-            System.out.println("2. Deposit");
-            System.out.println("3. Withdraw");
-            System.out.println("4. Display Account Details");
-            System.out.println("5. Exit");
-            System.out.print("Choose an option: ");
-            
-            int choice = scanner.nextInt();
-            scanner.nextLine();  // Consume the newline character
+    // Account class
+    static class Account {
+        private int accountNumber;
+        private double balance;
+        private String accountType;
 
-            switch (choice) {
-                case 1: // Create Account
-                    System.out.print("Enter account holder name: ");
-                    String name = scanner.nextLine();
-                    System.out.print("Enter account number: ");
-                    String accNumber = scanner.nextLine();
-                    account = new BankAccount(name, accNumber);
-                    System.out.println("Account created successfully!");
-                    break;
+        public Account(int accountNumber, String accountType, double initialBalance) {
+            this.accountNumber = accountNumber;
+            this.accountType = accountType;
+            this.balance = initialBalance;
+        }
 
-                case 2: // Deposit
-                    if (account == null) {
-                        System.out.println("No account exists. Please create an account first.");
-                    } else {
-                        System.out.print("Enter deposit amount: ");
-                        double depositAmount = scanner.nextDouble();
-                        account.deposit(depositAmount);
-                    }
-                    break;
+        public int getAccountNumber() {
+            return accountNumber;
+        }
 
-                case 3: // Withdraw
-                    if (account == null) {
-                        System.out.println("No account exists. Please create an account first.");
-                    } else {
-                        System.out.print("Enter withdrawal amount: ");
-                        double withdrawAmount = scanner.nextDouble();
-                        account.withdraw(withdrawAmount);
-                    }
-                    break;
+        public double getBalance() {
+            return balance;
+        }
 
-                case 4: // Display Account Details
-                    if (account == null) {
-                        System.out.println("No account exists. Please create an account first.");
-                    } else {
-                        account.displayAccountDetails();
-                    }
-                    break;
+        public String getAccountType() {
+            return accountType;
+        }
 
-                case 5: // Exit
-                    System.out.println("Exiting system. Goodbye!");
-                    scanner.close();
-                    System.exit(0);
+        public void deposit(double amount) {
+            if (amount > 0) {
+                balance += amount;
+            } else {
+                System.out.println("Invalid deposit amount.");
+            }
+        }
 
-                default:
-                    System.out.println("Invalid option. Please try again.");
+        public void withdraw(double amount) {
+            if (amount > 0 && balance >= amount) {
+                balance -= amount;
+            } else {
+                System.out.println("Insufficient funds or invalid withdrawal amount.");
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "Account Number: " + accountNumber + ", Type: " + accountType + ", Balance: " + balance;
+        }
+    }
+
+    // Customer class
+    static class Customer {
+        private int customerId;
+        private String name;
+        private Map<Integer, Account> accounts;
+
+        public Customer(int customerId, String name) {
+            this.customerId = customerId;
+            this.name = name;
+            this.accounts = new HashMap<>();
+        }
+
+        public int getCustomerId() {
+            return customerId;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public void addAccount(Account account) {
+            accounts.put(account.getAccountNumber(), account);
+        }
+
+        public Account getAccount(int accountNumber) {
+            return accounts.get(accountNumber);
+        }
+
+        public void displayAccounts() {
+            for (Account account : accounts.values()) {
+                System.out.println(account);
             }
         }
     }
+
+    // Transaction class
+    static class Transaction {
+        private int transactionId;
+        private String type; // "deposit", "withdrawal", "transfer"
+        private double amount;
+        private Account account;
+
+        public Transaction(int transactionId, String type, double amount, Account account) {
+            this.transactionId = transactionId;
+            this.type = type;
+            this.amount = amount;
+            this.account = account;
+        }
+
+        public void processTransaction() {
+            switch (type.toLowerCase()) {
+                case "deposit":
+                    account.deposit(amount);
+                    System.out.println("Deposited " + amount + " to account " + account.getAccountNumber());
+                    break;
+                case "withdrawal":
+                    account.withdraw(amount);
+                    System.out.println("Withdrew " + amount + " from account " + account.getAccountNumber());
+                    break;
+                default:
+                    System.out.println("Invalid transaction type.");
+                    break;
+            }
+        }
+    }
+
+    // Bank class
+    static class Bank {
+        private Map<Integer, Customer> customers;
+
+        public Bank() {
+            customers = new HashMap<>();
+        }
+
+        public void addCustomer(Customer customer) {
+            customers.put(customer.getCustomerId(), customer);
+        }
+
+        public Customer getCustomer(int customerId) {
+            return customers.get(customerId);
+        }
+
+        public Account createAccount(int customerId, int accountNumber, String accountType, double initialBalance) {
+            Customer customer = customers.get(customerId);
+            if (customer != null) {
+                Account account = new Account(accountNumber, accountType, initialBalance);
+                customer.addAccount(account);
+                return account;
+            }
+            System.out.println("Customer not found.");
+            return null;
+        }
+
+        public void displayAllAccounts(int customerId) {
+            Customer customer = customers.get(customerId);
+            if (customer != null) {
+                customer.displayAccounts();
+            } else {
+                System.out.println("Customer not found.");
+            }
+        }
+    }
+
+    // Main class to run the system
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        Bank bank = new Bank();
+
+        // Create Customers
+        Customer customer1 = new Customer(1, "John Doe");
+        Customer customer2 = new Customer(2, "Jane Smith");
+
+        bank.addCustomer(customer1);
+        bank.addCustomer(customer2);
+
+        // Create Accounts
+        bank.createAccount(1, 1001, "Saving", 1000.0);
+        bank.createAccount(1, 1002, "Checking", 2000.0);
+        bank.createAccount(2, 2001, "Saving", 1500.0);
+
+        System.out.println("Bank Management System");
+
+        // Simple interaction
+        while (true) {
+            System.out.println("\n1. Display Customer Accounts");
+            System.out.println("2. Deposit");
+            System.out.println("3. Withdraw");
+            System.out.println("4. Exit");
+            System.out.print("Select an option: ");
+            int option = scanner.nextInt();
+
+            if (option == 1) {
+                System.out.print("Enter Customer ID: ");
+                int customerId = scanner.nextInt();
+                bank.displayAllAccounts(customerId);
+            } else if (option == 2) {
+                System.out.print("Enter Customer ID: ");
+                int customerId = scanner.nextInt();
+                System.out.print("Enter Account Number: ");
+                int accountNumber = scanner.nextInt();
+                System.out.print("Enter Deposit Amount: ");
+                double amount = scanner.nextDouble();
+
+                Customer customer = bank.getCustomer(customerId);
+                if (customer != null) {
+                    Account account = customer.getAccount(accountNumber);
+                    if (account != null) {
+                        Transaction transaction = new Transaction(1, "deposit", amount, account);
+                        transaction.processTransaction();
+                    } else {
+                        System.out.println("Account not found.");
+                    }
+                }
+            } else if (option == 3) {
+                System.out.print("Enter Customer ID: ");
+                int customerId = scanner.nextInt();
+                System.out.print("Enter Account Number: ");
+                int accountNumber = scanner.nextInt();
+                System.out.print("Enter Withdrawal Amount: ");
+                double amount = scanner.nextDouble();
+
+                Customer customer = bank.getCustomer(customerId);
+                if (customer != null) {
+                    Account account = customer.getAccount(accountNumber);
+                    if (account != null) {
+                        Transaction transaction = new Transaction(2, "withdrawal", amount, account);
+                        transaction.processTransaction();
+                    } else {
+                        System.out.println("Account not found.");
+                    }
+                }
+            } else if (option == 4) {
+                break;
+            } else {
+                System.out.println("Invalid option.");
+            }
+        }
+
+        scanner.close();
+    }
 }
+
